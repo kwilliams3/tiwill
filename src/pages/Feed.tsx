@@ -192,11 +192,11 @@ const Feed = () => {
       {/* Bottom Navigation */}
       <nav className="bottom-nav safe-bottom">
         <div className="flex justify-around py-3">
-          {[
+        {[
             { icon: Home, label: "Accueil", active: true },
             { icon: Search, label: "Découvrir" },
             { icon: Plus, label: "Créer", special: true, action: () => setShowCreatePost(true) },
-            { icon: MessageCircle, label: "Messages" },
+            { icon: MessageCircle, label: "Messages", path: "/chat" },
             { icon: User, label: "Profil", path: "/profile" },
           ].map((item) => (
             <button
