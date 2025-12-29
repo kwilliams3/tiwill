@@ -17,7 +17,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-tiwill-pink via-tiwill-purple to-tiwill-blue overflow-hidden">
-      <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_25%_25%,_rgba(255,255,255,0.2)_1px,_transparent_1px)] bg-[length:40px_40px]" />
       
       <div className="relative min-h-screen flex flex-col items-center justify-center px-6 py-12">
         <motion.div
