@@ -7,17 +7,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CreatePostModal } from "@/components/CreatePostModal";
 import { EmojiReactions } from "@/components/EmojiReactions";
+import { StoryViewer } from "@/components/StoryViewer";
 import { Home, Search, Plus, MessageCircle, User, Clock, MessageSquare, MoreHorizontal } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 
 const Feed = () => {
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [viewingStoryGroupIndex, setViewingStoryGroupIndex] = useState<number | null>(null);
   const { user, loading: authLoading } = useAuth();
   const { posts, loading: postsLoading } = usePosts();
-  const { groupedStories } = useStories();
+  const { groupedStories, markAsViewed } = useStories();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -55,8 +57,12 @@ const Feed = () => {
             <span className="text-xs text-muted-foreground">Ajouter</span>
           </button>
 
-          {groupedStories.map((group) => (
-            <button key={group.userId} className="flex flex-col items-center gap-1 shrink-0">
+          {groupedStories.map((group, index) => (
+            <button 
+              key={group.userId} 
+              className="flex flex-col items-center gap-1 shrink-0"
+              onClick={() => setViewingStoryGroupIndex(index)}
+            >
               <div className={cn("p-0.5 rounded-full", group.hasUnviewed ? "story-ring" : "bg-muted")}>
                 <Avatar className="w-14 h-14 border-2 border-background">
                   <AvatarImage src={group.profile.avatar_url || ""} />
@@ -145,6 +151,18 @@ const Feed = () => {
           ))
         )}
       </div>
+
+      {/* Story Viewer */}
+      <AnimatePresence>
+        {viewingStoryGroupIndex !== null && (
+          <StoryViewer
+            groups={groupedStories}
+            initialGroupIndex={viewingStoryGroupIndex}
+            onClose={() => setViewingStoryGroupIndex(null)}
+            onViewed={markAsViewed}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Create Post Modal */}
       <CreatePostModal open={showCreatePost} onOpenChange={setShowCreatePost} />
