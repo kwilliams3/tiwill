@@ -3,8 +3,9 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { ChatList } from "@/components/ChatList";
 import { ChatConversation } from "@/components/ChatConversation";
-import { MessageCircle, Home, Search, Plus, User } from "lucide-react";
+import { MessageCircle, Home, Search, User, ArrowLeft, MoreVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export default function Chat() {
   const { user, loading } = useAuth();
@@ -13,6 +14,15 @@ export default function Chat() {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(
     searchParams.get("id")
   );
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -29,30 +39,72 @@ export default function Chat() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-10 h-10 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-background safe-area-padding">
+        <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
       </div>
     );
   }
 
   if (!user) return null;
 
+  const showChatList = !selectedConversation || !isMobile;
+  const showConversation = selectedConversation;
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-40 glass border-b px-4 py-3 safe-top">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-display font-bold gradient-text">Messages</h1>
+    <div className="min-h-screen bg-background flex flex-col safe-area-padding">
+      {/* Header - Changes based on state */}
+      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b px-4 py-3 safe-top">
+        <div className="flex items-center justify-between h-12">
+          {showConversation && isMobile ? (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSelectedConversation(null)}
+                className="w-10 h-10 touch-target rounded-full"
+                aria-label="Retour aux conversations"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <h1 className="text-lg font-semibold truncate max-w-[60vw]">
+                {/* Will be populated by ChatConversation component */}
+              </h1>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-10 h-10 touch-target rounded-full"
+                aria-label="Options"
+              >
+                <MoreVertical className="w-5 h-5" />
+              </Button>
+            </>
+          ) : (
+            <>
+              <h1 className="text-xl font-bold gradient-text">Messages</h1>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-10 h-10 touch-target rounded-full"
+                  aria-label="Nouvelle conversation"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </header>
 
       {/* Main content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Chat list - always visible on desktop, hidden when conversation selected on mobile */}
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Chat list */}
         <div
-          className={`w-full md:w-80 lg:w-96 border-r border-border flex-shrink-0 ${
-            selectedConversation ? "hidden md:block" : "block"
-          }`}
+          className={cn(
+            "w-full md:w-80 lg:w-96 border-r border-border flex-shrink-0 transition-all duration-200",
+            showChatList ? "block" : "hidden md:block",
+            isMobile && showConversation && "absolute inset-0 z-10 bg-background"
+          )}
         >
           <ChatList
             onSelectConversation={setSelectedConversation}
@@ -62,9 +114,11 @@ export default function Chat() {
 
         {/* Conversation area */}
         <div
-          className={`flex-1 ${
-            selectedConversation ? "block" : "hidden md:flex md:items-center md:justify-center"
-          }`}
+          className={cn(
+            "flex-1 transition-all duration-200",
+            showConversation ? "block" : "hidden md:flex md:items-center md:justify-center",
+            isMobile && !showConversation && "hidden"
+          )}
         >
           {selectedConversation ? (
             <ChatConversation
@@ -72,39 +126,64 @@ export default function Chat() {
               onBack={() => setSelectedConversation(null)}
             />
           ) : (
-            <div className="hidden md:flex flex-col items-center justify-center text-muted-foreground">
-              <MessageCircle className="h-16 w-16 mb-4 opacity-50" />
-              <p className="text-lg">Sélectionnez une conversation</p>
+            <div className="hidden md:flex flex-col items-center justify-center text-muted-foreground p-8">
+              <div className="relative mb-6">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                  <MessageCircle className="h-12 w-12 text-primary/60" />
+                </div>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Aucune conversation sélectionnée</h3>
+              <p className="text-sm text-muted-foreground text-center max-w-sm mb-6">
+                Sélectionnez une conversation existante ou démarrez-en une nouvelle
+              </p>
+              <Button
+                className="rounded-full gradient-primary text-white px-6"
+                onClick={() => {/* TODO: Add new conversation logic */}}
+              >
+                Nouvelle conversation
+              </Button>
             </div>
           )}
         </div>
       </div>
 
       {/* Bottom Navigation */}
-      <nav className="bottom-nav safe-bottom">
-        <div className="flex justify-around py-3">
+      <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t z-40 safe-bottom">
+        <div className="flex justify-around items-center px-1 py-2">
           {[
             { icon: Home, label: "Accueil", path: "/feed" },
-            { icon: Search, label: "Découvrir" },
-            { icon: Plus, label: "Créer", special: true },
-            { icon: MessageCircle, label: "Messages", active: true },
+            { icon: Search, label: "Découvrir", path: "/discover" },
+            { icon: MessageCircle, label: "Messages", active: true, path: "/chat" },
             { icon: User, label: "Profil", path: "/profile" },
           ].map((item) => (
             <button
               key={item.label}
               onClick={() => item.path && navigate(item.path)}
               className={cn(
-                "flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-colors",
-                item.active && "text-primary",
-                item.special && "gradient-primary text-white rounded-full px-6 py-2 -mt-6 shadow-lg"
+                "flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all touch-target min-w-[64px]",
+                item.active
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
               )}
+              aria-label={item.label}
             >
-              <item.icon className={cn("w-6 h-6", item.special && "w-7 h-7")} />
-              {!item.special && <span className="text-xs">{item.label}</span>}
+              <item.icon className="w-6 h-6" />
+              <span className="text-[10px] font-medium">{item.label}</span>
             </button>
           ))}
         </div>
       </nav>
+
+      {/* FAB for new conversation (mobile) */}
+      {!selectedConversation && (
+        <button
+          className="fixed right-4 bottom-20 w-14 h-14 rounded-full gradient-primary shadow-xl flex items-center justify-center text-white touch-target z-30"
+          onClick={() => {/* TODO: Add new conversation logic */}}
+          aria-label="Nouvelle conversation"
+        >
+          <MessageCircle className="w-6 h-6" />
+        </button>
+      )}
     </div>
   );
 }
