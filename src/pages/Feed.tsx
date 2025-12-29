@@ -6,7 +6,8 @@ import { useStories } from "@/hooks/useStories";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CreatePostModal } from "@/components/CreatePostModal";
-import { Home, Search, Plus, MessageCircle, User, Clock, Heart, MessageSquare, MoreHorizontal } from "lucide-react";
+import { EmojiReactions } from "@/components/EmojiReactions";
+import { Home, Search, Plus, MessageCircle, User, Clock, MessageSquare, MoreHorizontal } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -133,12 +134,9 @@ const Feed = () => {
               )}
 
               {/* Actions */}
-              <div className="flex items-center gap-6 p-4 border-t border-border/50">
-                <button className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
-                  <Heart className="w-5 h-5" />
-                  <span className="text-sm">{post.likes_count}</span>
-                </button>
-                <button className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+              <div className="flex items-center gap-4 p-4 border-t border-border/50">
+                <EmojiReactions postId={post.id} />
+                <button className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors ml-auto">
                   <MessageSquare className="w-5 h-5" />
                   <span className="text-sm">{post.comments_count}</span>
                 </button>
