@@ -2,18 +2,20 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useInterests, useUserInterests } from "@/hooks/useInterests";
+import { useGamification } from "@/hooks/useGamification";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Camera, Settings, LogOut, Shield, Eye, EyeOff, Star } from "lucide-react";
+import { BadgeDisplay, LevelProgress } from "@/components/GamificationUI";
+import { ArrowLeft, Camera, Settings, LogOut, Shield, Eye, EyeOff, Star, Trophy } from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 
 const Profile = () => {
   const { user, signOut } = useAuth();
   const { profile, updateProfile, uploadAvatar } = useProfile();
   const { interests } = useInterests();
   const { userInterests } = useUserInterests(user?.id);
+  const { badges, userBadges } = useGamification();
   const navigate = useNavigate();
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,11 +64,16 @@ const Profile = () => {
       {/* Profile Info */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="px-6 mt-4">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-display font-bold">{profile?.display_name || "Utilisateur"}</h1>
+          <h1 className="text-2xl font-bold">{profile?.display_name || "Utilisateur"}</h1>
           <span className="level-badge"><Star className="w-3 h-3" /> Nv.{profile?.level || 1}</span>
         </div>
         {profile?.username && <p className="text-muted-foreground">@{profile.username}</p>}
         {profile?.bio && <p className="mt-2 text-sm">{profile.bio}</p>}
+
+        {/* Level Progress */}
+        <div className="mt-6 p-4 rounded-2xl bg-muted/50">
+          <LevelProgress level={profile?.level || 1} points={profile?.points || 0} />
+        </div>
 
         {/* Stats */}
         <div className="flex gap-6 mt-6 py-4 border-y border-border">
@@ -75,13 +82,21 @@ const Profile = () => {
             <p className="text-xs text-muted-foreground">Points</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold">0</p>
-            <p className="text-xs text-muted-foreground">Posts</p>
+            <p className="text-2xl font-bold">{userBadges.length}</p>
+            <p className="text-xs text-muted-foreground">Badges</p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold">0</p>
-            <p className="text-xs text-muted-foreground">Abonnés</p>
+            <p className="text-xs text-muted-foreground">Posts</p>
           </div>
+        </div>
+
+        {/* Badges */}
+        <div className="mt-6">
+          <h3 className="font-semibold mb-3 flex items-center gap-2">
+            <Trophy className="w-4 h-4 text-primary" /> Badges
+          </h3>
+          <BadgeDisplay badges={badges} userBadges={userBadges} size="md" />
         </div>
 
         {/* Interests */}
