@@ -7,8 +7,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { BadgeDisplay, LevelProgress } from "@/components/GamificationUI";
-import { ArrowLeft, Camera, Settings, LogOut, Shield, Eye, EyeOff, Star, Trophy } from "lucide-react";
-import { motion } from "framer-motion";
+import { 
+  ArrowLeft, Camera, Settings, LogOut, Shield, Eye, EyeOff, Star, Trophy,
+  User, Mail, Calendar, Sparkles, Heart, Zap, Crown
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 const Profile = () => {
   const { user, signOut } = useAuth();
@@ -17,10 +22,15 @@ const Profile = () => {
   const { userInterests } = useUserInterests(user?.id);
   const { badges, userBadges } = useGamification();
   const navigate = useNavigate();
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) await uploadAvatar(file);
+    if (file) {
+      setIsUploading(true);
+      await uploadAvatar(file);
+      setIsUploading(false);
+    }
   };
 
   const handleSignOut = async () => {
@@ -30,121 +40,306 @@ const Profile = () => {
 
   const userInterestsList = interests.filter((i) => userInterests.includes(i.id));
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 100 }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background pb-8">
-      {/* Header with gradient */}
-      <div className="relative h-40 gradient-primary">
-        <div className="absolute inset-0 bg-black/20" />
-        <div className="relative z-10 flex items-center justify-between px-4 pt-4 safe-top">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/feed")} className="text-white hover:bg-white/20 rounded-full">
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 rounded-full">
-            <Settings className="w-5 h-5" />
-          </Button>
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20 pb-8">
+      {/* Gradient Header with Glass Effect */}
+      <div className="relative h-48 gradient-primary overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/30" />
+        <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full bg-gradient-to-r from-tiwill-pink/30 to-tiwill-purple/30 blur-3xl" />
+        <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-gradient-to-r from-tiwill-purple/20 to-blue-500/20 blur-3xl" />
+        
+        {/* Glassmorphism Navigation */}
+        <div className="relative z-10 flex items-center justify-between px-6 pt-8 safe-top">
+          <motion.div
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/feed")}
+              className="backdrop-blur-lg bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          </motion.div>
+          
+          <motion.div
+            initial={{ x: 20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              className="backdrop-blur-lg bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300"
+            >
+              <Settings className="w-5 h-5" />
+            </Button>
+          </motion.div>
         </div>
       </div>
 
-      {/* Avatar */}
-      <div className="relative -mt-16 px-6">
-        <label className="relative inline-block cursor-pointer group">
-          <Avatar className="w-32 h-32 border-4 border-background shadow-xl">
-            <AvatarImage src={profile?.avatar_url || ""} />
-            <AvatarFallback className="bg-gradient-to-br from-tiwill-pink to-tiwill-purple text-white text-3xl">
-              {(profile?.display_name || user?.email || "U")[0].toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="absolute bottom-2 right-2 w-8 h-8 rounded-full gradient-primary flex items-center justify-center shadow-lg">
-            <Camera className="w-4 h-4 text-white" />
+      {/* Profile Content */}
+      <div className="relative px-6 -mt-24">
+        {/* Avatar with Glow Effect */}
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", delay: 0.2 }}
+          className="relative flex justify-center"
+        >
+          <div className="relative group">
+            <div className="absolute -inset-2 bg-gradient-to-r from-tiwill-pink to-tiwill-purple rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
+            <label className={cn(
+              "relative inline-block cursor-pointer",
+              isUploading && "animate-pulse"
+            )}>
+              <Avatar className="w-36 h-36 border-6 border-background shadow-2xl relative z-10 transform transition-transform duration-300 group-hover:scale-105">
+                <AvatarImage src={profile?.avatar_url || ""} />
+                <AvatarFallback className="bg-gradient-to-br from-tiwill-pink to-tiwill-purple text-white text-4xl">
+                  {(profile?.display_name || user?.email || "U")[0].toUpperCase()}
+                </AvatarFallback>
+                {isUploading && (
+                  <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  </div>
+                )}
+              </Avatar>
+              <div className="absolute bottom-3 right-3 w-10 h-10 rounded-full gradient-primary flex items-center justify-center shadow-xl transform transition-transform duration-300 group-hover:scale-110 z-20">
+                <Camera className="w-5 h-5 text-white" />
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
+                disabled={isUploading}
+              />
+            </label>
           </div>
-          <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
-        </label>
-      </div>
+        </motion.div>
 
-      {/* Profile Info */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="px-6 mt-4">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold">{profile?.display_name || "Utilisateur"}</h1>
-          <span className="level-badge"><Star className="w-3 h-3" /> Nv.{profile?.level || 1}</span>
-        </div>
-        {profile?.username && <p className="text-muted-foreground">@{profile.username}</p>}
-        {profile?.bio && <p className="mt-2 text-sm">{profile.bio}</p>}
-
-        {/* Level Progress */}
-        <div className="mt-6 p-4 rounded-2xl bg-muted/50">
-          <LevelProgress level={profile?.level || 1} points={profile?.points || 0} />
-        </div>
-
-        {/* Stats */}
-        <div className="flex gap-6 mt-6 py-4 border-y border-border">
-          <div className="text-center">
-            <p className="text-2xl font-bold gradient-text">{profile?.points || 0}</p>
-            <p className="text-xs text-muted-foreground">Points</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold">{userBadges.length}</p>
-            <p className="text-xs text-muted-foreground">Badges</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold">0</p>
-            <p className="text-xs text-muted-foreground">Posts</p>
-          </div>
-        </div>
-
-        {/* Badges */}
-        <div className="mt-6">
-          <h3 className="font-semibold mb-3 flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-primary" /> Badges
-          </h3>
-          <BadgeDisplay badges={badges} userBadges={userBadges} size="md" />
-        </div>
-
-        {/* Interests */}
-        {userInterestsList.length > 0 && (
-          <div className="mt-6">
-            <h3 className="font-semibold mb-3">Centres d'intérêt</h3>
-            <div className="flex flex-wrap gap-2">
-              {userInterestsList.map((interest) => (
-                <span key={interest.id} className="px-3 py-1 rounded-full bg-muted text-sm">
-                  {interest.emoji} {interest.name}
+        {/* Profile Info */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-6 mt-8"
+        >
+          {/* Name and Level */}
+          <motion.div variants={itemVariants} className="text-center">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-tiwill-pink to-tiwill-purple bg-clip-text text-transparent">
+                {profile?.display_name || "Utilisateur"}
+              </h1>
+              <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 text-amber-600 text-sm font-semibold">
+                <Star className="w-3 h-3 fill-amber-500" />
+                Nv.{profile?.level || 1}
+              </span>
+            </div>
+            
+            <div className="flex items-center justify-center gap-4 text-muted-foreground text-sm">
+              {profile?.username && (
+                <span className="flex items-center gap-1">
+                  <User className="w-3 h-3" />
+                  @{profile.username}
                 </span>
+              )}
+              {user?.email && (
+                <span className="flex items-center gap-1">
+                  <Mail className="w-3 h-3" />
+                  {user.email}
+                </span>
+              )}
+            </div>
+            
+            {profile?.bio && (
+              <p className="mt-4 text-center text-foreground/80 max-w-2xl mx-auto">
+                {profile.bio}
+              </p>
+            )}
+          </motion.div>
+
+          {/* Level Progress Card */}
+          <motion.div variants={itemVariants}>
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white to-muted/50 dark:from-gray-900 dark:to-gray-800 p-6 shadow-xl border border-border/50">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-tiwill-pink/10 to-tiwill-purple/10 rounded-full -translate-y-16 translate-x-16" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-primary" />
+                    <h3 className="font-bold">Progression</h3>
+                  </div>
+                  <span className="text-sm font-semibold gradient-text">
+                    {profile?.points || 0} points
+                  </span>
+                </div>
+                <LevelProgress level={profile?.level || 1} points={profile?.points || 0} />
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Stats Grid */}
+          <motion.div variants={itemVariants}>
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { label: "Points", value: profile?.points || 0, icon: Sparkles, color: "from-tiwill-pink to-tiwill-purple" },
+                { label: "Badges", value: userBadges.length, icon: Trophy, color: "from-amber-500 to-orange-500" },
+                { label: "Posts", value: 0, icon: Heart, color: "from-emerald-500 to-cyan-500" },
+              ].map((stat, index) => (
+                <div
+                  key={index}
+                  className="rounded-2xl bg-gradient-to-br from-white/50 to-white/20 dark:from-gray-900/50 dark:to-gray-800/50 p-4 text-center backdrop-blur-sm border border-border/30 shadow-lg"
+                >
+                  <div className={`inline-flex p-2 rounded-xl bg-gradient-to-br ${stat.color} mb-2`}>
+                    <stat.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <p className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                    {stat.value}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+                </div>
               ))}
             </div>
-          </div>
-        )}
+          </motion.div>
 
-        {/* Privacy Settings */}
-        <div className="mt-8 space-y-4">
-          <h3 className="font-semibold flex items-center gap-2"><Shield className="w-4 h-4" /> Confidentialité</h3>
-          
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/50">
-            <div className="flex items-center gap-3">
-              <EyeOff className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium text-sm">Mode anonyme</p>
-                <p className="text-xs text-muted-foreground">Tes posts seront anonymes</p>
+          {/* Badges Section */}
+          {userBadges.length > 0 && (
+            <motion.div variants={itemVariants}>
+              <div className="rounded-3xl bg-gradient-to-br from-white to-muted/50 dark:from-gray-900 dark:to-gray-800 p-6 shadow-xl border border-border/50">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20">
+                      <Trophy className="w-5 h-5 text-amber-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold">Badges obtenus</h3>
+                      <p className="text-sm text-muted-foreground">Vos accomplissements</p>
+                    </div>
+                  </div>
+                  <Crown className="w-5 h-5 text-amber-500" />
+                </div>
+                <BadgeDisplay badges={badges} userBadges={userBadges} size="md" />
+              </div>
+            </motion.div>
+          )}
+
+          {/* Interests Section */}
+          {userInterestsList.length > 0 && (
+            <motion.div variants={itemVariants}>
+              <div className="rounded-3xl bg-gradient-to-br from-white to-muted/50 dark:from-gray-900 dark:to-gray-800 p-6 shadow-xl border border-border/50">
+                <h3 className="font-bold mb-4">Centres d'intérêt</h3>
+                <div className="flex flex-wrap gap-2">
+                  <AnimatePresence>
+                    {userInterestsList.map((interest, index) => (
+                      <motion.span
+                        key={interest.id}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="px-4 py-2 rounded-full bg-gradient-to-r from-muted to-muted/80 border border-border/50 text-sm font-medium hover:scale-105 transition-transform duration-200"
+                      >
+                        <span className="mr-2">{interest.emoji}</span>
+                        {interest.name}
+                      </motion.span>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Privacy Settings */}
+          <motion.div variants={itemVariants}>
+            <div className="rounded-3xl bg-gradient-to-br from-white to-muted/50 dark:from-gray-900 dark:to-gray-800 p-6 shadow-xl border border-border/50">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
+                  <Shield className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-bold">Confidentialité</h3>
+                  <p className="text-sm text-muted-foreground">Gérer votre vie privée</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {[
+                  {
+                    icon: EyeOff,
+                    title: "Mode anonyme",
+                    description: "Tes posts seront anonymes",
+                    checked: profile?.is_anonymous || false,
+                    onChange: (checked: boolean) => updateProfile({ is_anonymous: checked })
+                  },
+                  {
+                    icon: Eye,
+                    title: "Masquer les likes",
+                    description: "Mode anti-FOMO",
+                    checked: profile?.hide_likes || false,
+                    onChange: (checked: boolean) => updateProfile({ hide_likes: checked })
+                  }
+                ].map((setting, index) => (
+                  <motion.div
+                    key={index}
+                    whileHover={{ scale: 1.02 }}
+                    className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-muted/50 to-muted/30 hover:from-muted/70 hover:to-muted/50 transition-all duration-200"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 rounded-xl bg-white/50 dark:bg-gray-800/50">
+                        <setting.icon className="w-5 h-5 text-foreground/70" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">{setting.title}</p>
+                        <p className="text-xs text-muted-foreground">{setting.description}</p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={setting.checked}
+                      onCheckedChange={setting.onChange}
+                      className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-tiwill-pink data-[state=checked]:to-tiwill-purple"
+                    />
+                  </motion.div>
+                ))}
               </div>
             </div>
-            <Switch checked={profile?.is_anonymous || false} onCheckedChange={(checked) => updateProfile({ is_anonymous: checked })} />
-          </div>
+          </motion.div>
 
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/50">
-            <div className="flex items-center gap-3">
-              <Eye className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium text-sm">Masquer les likes</p>
-                <p className="text-xs text-muted-foreground">Mode anti-FOMO</p>
-              </div>
-            </div>
-            <Switch checked={profile?.hide_likes || false} onCheckedChange={(checked) => updateProfile({ hide_likes: checked })} />
-          </div>
-        </div>
-
-        {/* Logout */}
-        <Button onClick={handleSignOut} variant="outline" className="w-full mt-8 h-12 rounded-2xl text-destructive border-destructive/30 hover:bg-destructive/10">
-          <LogOut className="w-5 h-5 mr-2" /> Se déconnecter
-        </Button>
-      </motion.div>
+          {/* Logout Button */}
+          <motion.div variants={itemVariants}>
+            <Button
+              onClick={handleSignOut}
+              variant="outline"
+              className="w-full h-14 rounded-2xl text-destructive border-destructive/30 hover:bg-destructive/10 hover:border-destructive/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-lg"
+            >
+              <LogOut className="w-5 h-5 mr-2" />
+              Se déconnecter
+            </Button>
+          </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 };
