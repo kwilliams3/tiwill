@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { CreatePostModal } from "@/components/CreatePostModal";
 import { EmojiReactions } from "@/components/EmojiReactions";
 import { StoryViewer } from "@/components/StoryViewer";
+import { CommentsSection } from "@/components/CommentsSection";
 import { Home, Search, Plus, MessageCircle, User, Clock, MessageSquare, MoreHorizontal } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -17,6 +18,8 @@ import { fr } from "date-fns/locale";
 const Feed = () => {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [viewingStoryGroupIndex, setViewingStoryGroupIndex] = useState<number | null>(null);
+  const [viewingCommentsPostId, setViewingCommentsPostId] = useState<string | null>(null);
+  const [viewingCommentsCount, setViewingCommentsCount] = useState(0);
   const { user, loading: authLoading } = useAuth();
   const { posts, loading: postsLoading } = usePosts();
   const { groupedStories, markAsViewed } = useStories();
@@ -142,7 +145,13 @@ const Feed = () => {
               {/* Actions */}
               <div className="flex items-center gap-4 p-4 border-t border-border/50">
                 <EmojiReactions postId={post.id} />
-                <button className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors ml-auto">
+                <button 
+                  className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors ml-auto"
+                  onClick={() => {
+                    setViewingCommentsPostId(post.id);
+                    setViewingCommentsCount(post.comments_count || 0);
+                  }}
+                >
                   <MessageSquare className="w-5 h-5" />
                   <span className="text-sm">{post.comments_count}</span>
                 </button>
@@ -163,6 +172,14 @@ const Feed = () => {
           />
         )}
       </AnimatePresence>
+
+      {/* Comments Section */}
+      <CommentsSection
+        postId={viewingCommentsPostId || ""}
+        open={viewingCommentsPostId !== null}
+        onOpenChange={(open) => !open && setViewingCommentsPostId(null)}
+        commentsCount={viewingCommentsCount}
+      />
 
       {/* Create Post Modal */}
       <CreatePostModal open={showCreatePost} onOpenChange={setShowCreatePost} />
