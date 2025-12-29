@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { usePosts } from "@/hooks/usePosts";
 import { useStories } from "@/hooks/useStories";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { CreatePostModal } from "@/components/CreatePostModal";
 import { Home, Search, Plus, MessageCircle, User, Clock, Heart, MessageSquare, MoreHorizontal } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -12,6 +13,7 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 
 const Feed = () => {
+  const [showCreatePost, setShowCreatePost] = useState(false);
   const { user, loading: authLoading } = useAuth();
   const { posts, loading: postsLoading } = usePosts();
   const { groupedStories } = useStories();
@@ -146,8 +148,11 @@ const Feed = () => {
         )}
       </div>
 
+      {/* Create Post Modal */}
+      <CreatePostModal open={showCreatePost} onOpenChange={setShowCreatePost} />
+
       {/* FAB */}
-      <button className="fab animate-pulse-glow" onClick={() => {}}>
+      <button className="fab animate-pulse-glow" onClick={() => setShowCreatePost(true)}>
         <Plus className="w-7 h-7" />
       </button>
 
@@ -157,13 +162,13 @@ const Feed = () => {
           {[
             { icon: Home, label: "Accueil", active: true },
             { icon: Search, label: "Découvrir" },
-            { icon: Plus, label: "Créer", special: true },
+            { icon: Plus, label: "Créer", special: true, action: () => setShowCreatePost(true) },
             { icon: MessageCircle, label: "Messages" },
             { icon: User, label: "Profil", path: "/profile" },
           ].map((item) => (
             <button
               key={item.label}
-              onClick={() => item.path && navigate(item.path)}
+              onClick={() => item.path ? navigate(item.path) : item.action?.()}
               className={cn(
                 "flex flex-col items-center gap-1 px-4 py-1 rounded-xl transition-colors",
                 item.active && "text-primary",
