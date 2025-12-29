@@ -9,6 +9,7 @@ import { CreatePostModal } from "@/components/CreatePostModal";
 import { EmojiReactions } from "@/components/EmojiReactions";
 import { StoryViewer } from "@/components/StoryViewer";
 import { CommentsSection } from "@/components/CommentsSection";
+import { TiWillLogo } from "@/components/TiWillLogo";
 import { Home, Search, Plus, MessageCircle, User, Clock, MessageSquare, MoreHorizontal } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -42,8 +43,8 @@ const Feed = () => {
       {/* Header */}
       <header className="sticky top-0 z-30 glass border-b px-4 py-3 safe-top">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-display font-bold gradient-text">TiWill</h1>
-          <Button variant="ghost" size="icon" className="rounded-full">
+          <TiWillLogo size="sm" animate={false} />
+          <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate("/chat")}>
             <MessageCircle className="w-6 h-6" />
           </Button>
         </div>
