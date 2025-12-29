@@ -10,6 +10,7 @@ import { EmojiReactions } from "@/components/EmojiReactions";
 import { StoryViewer } from "@/components/StoryViewer";
 import { CommentsSection } from "@/components/CommentsSection";
 import { TiWillLogo } from "@/components/TiWillLogo";
+import { NotificationCenter } from "@/components/NotificationCenter";
 import { Home, Search, Plus, MessageCircle, User, Clock, MessageSquare, MoreHorizontal } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -44,9 +45,12 @@ const Feed = () => {
       <header className="sticky top-0 z-30 glass border-b px-4 py-3 safe-top">
         <div className="flex items-center justify-between">
           <TiWillLogo size="sm" animate={false} />
-          <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate("/chat")}>
-            <MessageCircle className="w-6 h-6" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <NotificationCenter />
+            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate("/chat")}>
+              <MessageCircle className="w-6 h-6" />
+            </Button>
+          </div>
         </div>
       </header>
 
