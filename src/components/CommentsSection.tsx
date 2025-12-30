@@ -41,7 +41,7 @@ interface CommentsSectionProps {
   postId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  commentsCount: number;
+  commentsCount?: number;
 }
 
 export function CommentsSection({ postId, open, onOpenChange, commentsCount }: CommentsSectionProps) {
