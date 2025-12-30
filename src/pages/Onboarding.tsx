@@ -162,8 +162,8 @@ const Onboarding = () => {
                   <span className="text-2xl">{interest.emoji}</span>
                   <div className="flex-1 text-left">
                     <p className="font-medium text-sm">{interest.name}</p>
-                    {interest.description && (
-                      <p className="text-xs text-muted-foreground mt-1">{interest.description}</p>
+                    {interest.color && (
+                      <p className="text-xs text-muted-foreground mt-1">{interest.name}</p>
                     )}
                   </div>
                   {isSelected && (
