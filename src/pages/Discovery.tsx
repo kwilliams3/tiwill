@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDiscovery } from "@/hooks/useDiscovery";
 import { BottomNav } from "@/components/BottomNav";
+import { FriendSuggestions } from "@/components/FriendSuggestions";
 
 const Discovery = () => {
   const navigate = useNavigate();
@@ -193,11 +194,9 @@ const Discovery = () => {
               <div className="mt-8">
                 <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
                   <Users className="h-5 w-5 text-primary" />
-                  Suggestions
+                  Suggestions d'amis
                 </h2>
-                <p className="text-sm text-muted-foreground text-center py-8">
-                  Les suggestions d'amis arrivent bientôt ! 🎉
-                </p>
+                <FriendSuggestions />
               </div>
             </div>
           </TabsContent>
