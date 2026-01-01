@@ -11,7 +11,8 @@ import { StoryViewer } from "@/components/StoryViewer";
 import { CommentsSection } from "@/components/CommentsSection";
 import { TiWillLogo } from "@/components/TiWillLogo";
 import { NotificationCenter } from "@/components/NotificationCenter";
-import { Home, Search, Plus, MessageCircle, User, Clock, MessageSquare, MoreHorizontal, Globe } from "lucide-react";
+import { BottomNav } from "@/components/BottomNav";
+import { Plus, Clock, MessageSquare, MoreHorizontal, Globe, Search, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -265,32 +266,7 @@ const Feed = () => {
         <Plus className="w-6 h-6" />
       </button>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t z-40 safe-bottom">
-        <div className="flex justify-around items-center px-1 py-2">
-          {[
-            { icon: Home, label: "Accueil", active: true, path: "/feed" },
-            { icon: Search, label: "Découvrir", path: "/discovery" },
-            { icon: MessageCircle, label: "Messages", path: "/chat" },
-            { icon: User, label: "Profil", path: "/profile" },
-          ].map((item) => (
-            <button
-              key={item.label}
-              onClick={() => item.path && navigate(item.path)}
-              className={cn(
-                "flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all touch-target min-w-[64px]",
-                item.active
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              aria-label={item.label}
-            >
-              <item.icon className="w-6 h-6" />
-              <span className="text-[10px] font-medium">{item.label}</span>
-            </button>
-          ))}
-        </div>
-      </nav>
+      <BottomNav />
     </div>
   );
 };
