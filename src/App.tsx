@@ -11,6 +11,7 @@ import Feed from "./pages/Feed";
 import Profile from "./pages/Profile";
 import Chat from "./pages/Chat";
 import Discovery from "./pages/Discovery";
+import Connections from "./pages/Connections";
 import NotFound from "./pages/NotFound";
 import "@fontsource/poppins/400.css";
 import "@fontsource/poppins/500.css";
@@ -35,6 +36,8 @@ const App = () => (
             <Route path="/feed" element={<Feed />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/:userId" element={<Profile />} />
+            <Route path="/connections" element={<Connections />} />
+            <Route path="/connections/:userId" element={<Connections />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/discovery" element={<Discovery />} />
             <Route path="*" element={<NotFound />} />
