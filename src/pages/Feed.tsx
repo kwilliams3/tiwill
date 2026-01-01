@@ -42,7 +42,7 @@ const Feed = () => {
     <div className="min-h-screen bg-background pb-24 safe-area-padding">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b px-4 py-3 safe-top">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <TiWillLogo size="sm" animate={false} />
           <div className="flex items-center gap-2">
             <NotificationCenter />
@@ -57,6 +57,15 @@ const Feed = () => {
             </Button>
           </div>
         </div>
+        
+        {/* Search Bar */}
+        <button
+          onClick={() => navigate("/search")}
+          className="w-full flex items-center gap-3 px-4 h-12 rounded-full bg-muted/60 border border-border/50 hover:border-primary/30 hover:bg-muted transition-all duration-300"
+        >
+          <Search className="w-5 h-5 text-muted-foreground" />
+          <span className="text-muted-foreground text-sm">Rechercher des amis...</span>
+        </button>
       </header>
 
       {/* Stories Section */}
