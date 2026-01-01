@@ -13,6 +13,7 @@ import Chat from "./pages/Chat";
 import Discovery from "./pages/Discovery";
 import Connections from "./pages/Connections";
 import Settings from "./pages/Settings";
+import Search from "./pages/Search";
 import NotFound from "./pages/NotFound";
 import "@fontsource/poppins/400.css";
 import "@fontsource/poppins/500.css";
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/connections" element={<Connections />} />
             <Route path="/connections/:userId" element={<Connections />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/search" element={<Search />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/discovery" element={<Discovery />} />
             <Route path="*" element={<NotFound />} />
