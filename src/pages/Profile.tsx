@@ -1,28 +1,79 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useInterests, useUserInterests } from "@/hooks/useInterests";
 import { useGamification } from "@/hooks/useGamification";
+import { useFollowStats } from "@/hooks/useFollow";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { BadgeDisplay, LevelProgress } from "@/components/GamificationUI";
+import { FollowButton } from "@/components/FollowButton";
 import { 
   ArrowLeft, Camera, Settings, LogOut, Shield, Eye, EyeOff, Star, Trophy,
-  User, Mail, Calendar, Sparkles, Heart, Zap, Crown
+  User, Mail, Sparkles, Heart, Zap, Crown, Users
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+interface ViewProfile {
+  id: string;
+  user_id: string;
+  username: string | null;
+  display_name: string | null;
+  bio: string | null;
+  avatar_url: string | null;
+  level: number;
+  points: number;
+}
 
 const Profile = () => {
+  const { userId } = useParams();
   const { user, signOut } = useAuth();
   const { profile, updateProfile, uploadAvatar } = useProfile();
   const { interests } = useInterests();
-  const { userInterests } = useUserInterests(user?.id);
-  const { badges, userBadges } = useGamification();
   const navigate = useNavigate();
   const [isUploading, setIsUploading] = useState(false);
+  
+  // Determine if viewing own profile or another user's
+  const isOwnProfile = !userId || userId === user?.id;
+  const targetUserId = userId || user?.id;
+  
+  const { userInterests } = useUserInterests(targetUserId);
+  const { badges, userBadges } = useGamification();
+  const { followersCount, followingCount } = useFollowStats(targetUserId);
+  
+  // For viewing other profiles
+  const [viewProfile, setViewProfile] = useState<ViewProfile | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
+  
+  useEffect(() => {
+    if (!isOwnProfile && userId) {
+      fetchUserProfile(userId);
+    }
+  }, [userId, isOwnProfile]);
+  
+  const fetchUserProfile = async (id: string) => {
+    setLoadingProfile(true);
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, user_id, username, display_name, bio, avatar_url, level, points")
+        .eq("user_id", id)
+        .maybeSingle();
+      
+      if (error) throw error;
+      setViewProfile(data);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    } finally {
+      setLoadingProfile(false);
+    }
+  };
+  
+  const displayProfile = isOwnProfile ? profile : viewProfile;
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -111,36 +162,58 @@ const Profile = () => {
           transition={{ type: "spring", delay: 0.2 }}
           className="relative flex justify-center"
         >
-          <div className="relative group">
-            <div className="absolute -inset-2 bg-gradient-to-r from-tiwill-pink to-tiwill-purple rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
-            <label className={cn(
-              "relative inline-block cursor-pointer",
-              isUploading && "animate-pulse"
-            )}>
-              <Avatar className="w-36 h-36 border-6 border-background shadow-2xl relative z-10 transform transition-transform duration-300 group-hover:scale-105">
-                <AvatarImage src={profile?.avatar_url || ""} />
-                <AvatarFallback className="bg-gradient-to-br from-tiwill-pink to-tiwill-purple text-white text-4xl">
-                  {(profile?.display_name || user?.email || "U")[0].toUpperCase()}
-                </AvatarFallback>
-                {isUploading && (
-                  <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
-                    <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          <div className="relative flex justify-center">
+            <div className="relative group">
+              <div className="absolute -inset-2 bg-gradient-to-r from-tiwill-pink to-tiwill-purple rounded-full blur-xl opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
+              {isOwnProfile ? (
+                <label className={cn(
+                  "relative inline-block cursor-pointer",
+                  isUploading && "animate-pulse"
+                )}>
+                  <Avatar className="w-36 h-36 border-6 border-background shadow-2xl relative z-10 transform transition-transform duration-300 group-hover:scale-105">
+                    <AvatarImage src={displayProfile?.avatar_url || ""} />
+                    <AvatarFallback className="bg-gradient-to-br from-tiwill-pink to-tiwill-purple text-white text-4xl">
+                      {(displayProfile?.display_name || user?.email || "U")[0].toUpperCase()}
+                    </AvatarFallback>
+                    {isUploading && (
+                      <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                        <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      </div>
+                    )}
+                  </Avatar>
+                  <div className="absolute bottom-3 right-3 w-10 h-10 rounded-full gradient-primary flex items-center justify-center shadow-xl transform transition-transform duration-300 group-hover:scale-110 z-20">
+                    <Camera className="w-5 h-5 text-white" />
                   </div>
-                )}
-              </Avatar>
-              <div className="absolute bottom-3 right-3 w-10 h-10 rounded-full gradient-primary flex items-center justify-center shadow-xl transform transition-transform duration-300 group-hover:scale-110 z-20">
-                <Camera className="w-5 h-5 text-white" />
-              </div>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-                className="hidden"
-                disabled={isUploading}
-              />
-            </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                    className="hidden"
+                    disabled={isUploading}
+                  />
+                </label>
+              ) : (
+                <Avatar className="w-36 h-36 border-6 border-background shadow-2xl relative z-10">
+                  <AvatarImage src={displayProfile?.avatar_url || ""} />
+                  <AvatarFallback className="bg-gradient-to-br from-tiwill-pink to-tiwill-purple text-white text-4xl">
+                    {(displayProfile?.display_name || "U")[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+            </div>
           </div>
         </motion.div>
+
+        {/* Follow Button for other profiles */}
+        {!isOwnProfile && targetUserId && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex justify-center mt-4"
+          >
+            <FollowButton targetUserId={targetUserId} />
+          </motion.div>
+        )}
 
         {/* Profile Info */}
         <motion.div
@@ -153,22 +226,22 @@ const Profile = () => {
           <motion.div variants={itemVariants} className="text-center">
             <div className="flex items-center justify-center gap-3 mb-2">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-tiwill-pink to-tiwill-purple bg-clip-text text-transparent">
-                {profile?.display_name || "Utilisateur"}
+                {displayProfile?.display_name || "Utilisateur"}
               </h1>
               <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 text-amber-600 text-sm font-semibold">
                 <Star className="w-3 h-3 fill-amber-500" />
-                Nv.{profile?.level || 1}
+                Nv.{displayProfile?.level || 1}
               </span>
             </div>
             
             <div className="flex items-center justify-center gap-4 text-muted-foreground text-sm">
-              {profile?.username && (
+              {displayProfile?.username && (
                 <span className="flex items-center gap-1">
                   <User className="w-3 h-3" />
-                  @{profile.username}
+                  @{displayProfile.username}
                 </span>
               )}
-              {user?.email && (
+              {isOwnProfile && user?.email && (
                 <span className="flex items-center gap-1">
                   <Mail className="w-3 h-3" />
                   {user.email}
@@ -176,9 +249,9 @@ const Profile = () => {
               )}
             </div>
             
-            {profile?.bio && (
+            {displayProfile?.bio && (
               <p className="mt-4 text-center text-foreground/80 max-w-2xl mx-auto">
-                {profile.bio}
+                {displayProfile.bio}
               </p>
             )}
           </motion.div>
@@ -204,20 +277,21 @@ const Profile = () => {
 
           {/* Stats Grid */}
           <motion.div variants={itemVariants}>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 gap-3">
               {[
-                { label: "Points", value: profile?.points || 0, icon: Sparkles, color: "from-tiwill-pink to-tiwill-purple" },
+                { label: "Followers", value: followersCount, icon: Users, color: "from-pink-500 to-rose-500" },
+                { label: "Suivis", value: followingCount, icon: Heart, color: "from-tiwill-pink to-tiwill-purple" },
                 { label: "Badges", value: userBadges.length, icon: Trophy, color: "from-amber-500 to-orange-500" },
-                { label: "Posts", value: 0, icon: Heart, color: "from-emerald-500 to-cyan-500" },
+                { label: "Points", value: displayProfile?.points || 0, icon: Sparkles, color: "from-emerald-500 to-cyan-500" },
               ].map((stat, index) => (
                 <div
                   key={index}
-                  className="rounded-2xl bg-gradient-to-br from-white/50 to-white/20 dark:from-gray-900/50 dark:to-gray-800/50 p-4 text-center backdrop-blur-sm border border-border/30 shadow-lg"
+                  className="rounded-2xl bg-gradient-to-br from-white/50 to-white/20 dark:from-gray-900/50 dark:to-gray-800/50 p-3 text-center backdrop-blur-sm border border-border/30 shadow-lg"
                 >
                   <div className={`inline-flex p-2 rounded-xl bg-gradient-to-br ${stat.color} mb-2`}>
                     <stat.icon className="w-4 h-4 text-white" />
                   </div>
-                  <p className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                  <p className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
                     {stat.value}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
@@ -272,72 +346,76 @@ const Profile = () => {
             </motion.div>
           )}
 
-          {/* Privacy Settings */}
-          <motion.div variants={itemVariants}>
-            <div className="rounded-3xl bg-gradient-to-br from-white to-muted/50 dark:from-gray-900 dark:to-gray-800 p-6 shadow-xl border border-border/50">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
-                  <Shield className="w-5 h-5 text-blue-600" />
+          {/* Privacy Settings - Only show on own profile */}
+          {isOwnProfile && (
+            <motion.div variants={itemVariants}>
+              <div className="rounded-3xl bg-gradient-to-br from-white to-muted/50 dark:from-gray-900 dark:to-gray-800 p-6 shadow-xl border border-border/50">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
+                    <Shield className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold">Confidentialité</h3>
+                    <p className="text-sm text-muted-foreground">Gérer votre vie privée</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold">Confidentialité</h3>
-                  <p className="text-sm text-muted-foreground">Gérer votre vie privée</p>
+
+                <div className="space-y-4">
+                  {[
+                    {
+                      icon: EyeOff,
+                      title: "Mode anonyme",
+                      description: "Tes posts seront anonymes",
+                      checked: profile?.is_anonymous || false,
+                      onChange: (checked: boolean) => updateProfile({ is_anonymous: checked })
+                    },
+                    {
+                      icon: Eye,
+                      title: "Masquer les likes",
+                      description: "Mode anti-FOMO",
+                      checked: profile?.hide_likes || false,
+                      onChange: (checked: boolean) => updateProfile({ hide_likes: checked })
+                    }
+                  ].map((setting, index) => (
+                    <motion.div
+                      key={index}
+                      whileHover={{ scale: 1.02 }}
+                      className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-muted/50 to-muted/30 hover:from-muted/70 hover:to-muted/50 transition-all duration-200"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 rounded-xl bg-white/50 dark:bg-gray-800/50">
+                          <setting.icon className="w-5 h-5 text-foreground/70" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">{setting.title}</p>
+                          <p className="text-xs text-muted-foreground">{setting.description}</p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={setting.checked}
+                        onCheckedChange={setting.onChange}
+                        className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-tiwill-pink data-[state=checked]:to-tiwill-purple"
+                      />
+                    </motion.div>
+                  ))}
                 </div>
               </div>
+            </motion.div>
+          )}
 
-              <div className="space-y-4">
-                {[
-                  {
-                    icon: EyeOff,
-                    title: "Mode anonyme",
-                    description: "Tes posts seront anonymes",
-                    checked: profile?.is_anonymous || false,
-                    onChange: (checked: boolean) => updateProfile({ is_anonymous: checked })
-                  },
-                  {
-                    icon: Eye,
-                    title: "Masquer les likes",
-                    description: "Mode anti-FOMO",
-                    checked: profile?.hide_likes || false,
-                    onChange: (checked: boolean) => updateProfile({ hide_likes: checked })
-                  }
-                ].map((setting, index) => (
-                  <motion.div
-                    key={index}
-                    whileHover={{ scale: 1.02 }}
-                    className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-muted/50 to-muted/30 hover:from-muted/70 hover:to-muted/50 transition-all duration-200"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="p-2 rounded-xl bg-white/50 dark:bg-gray-800/50">
-                        <setting.icon className="w-5 h-5 text-foreground/70" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">{setting.title}</p>
-                        <p className="text-xs text-muted-foreground">{setting.description}</p>
-                      </div>
-                    </div>
-                    <Switch
-                      checked={setting.checked}
-                      onCheckedChange={setting.onChange}
-                      className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-tiwill-pink data-[state=checked]:to-tiwill-purple"
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Logout Button */}
-          <motion.div variants={itemVariants}>
-            <Button
-              onClick={handleSignOut}
-              variant="outline"
-              className="w-full h-14 rounded-2xl text-destructive border-destructive/30 hover:bg-destructive/10 hover:border-destructive/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-lg"
-            >
-              <LogOut className="w-5 h-5 mr-2" />
-              Se déconnecter
-            </Button>
-          </motion.div>
+          {/* Logout Button - Only show on own profile */}
+          {isOwnProfile && (
+            <motion.div variants={itemVariants}>
+              <Button
+                onClick={handleSignOut}
+                variant="outline"
+                className="w-full h-14 rounded-2xl text-destructive border-destructive/30 hover:bg-destructive/10 hover:border-destructive/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-lg"
+              >
+                <LogOut className="w-5 h-5 mr-2" />
+                Se déconnecter
+              </Button>
+            </motion.div>
+          )}
         </motion.div>
       </div>
     </div>
