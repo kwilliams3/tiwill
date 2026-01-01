@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { useConversation, Message } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { ArrowLeft, Send, Circle } from "lucide-react";
+import { useOnlinePresence } from "@/hooks/useOnlinePresence";
+import { OnlineIndicator } from "@/components/OnlineIndicator";
+import { ArrowLeft, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -19,7 +21,8 @@ interface ChatConversationProps {
 export function ChatConversation({ conversationId, onBack }: ChatConversationProps) {
   const { user } = useAuth();
   const { profile } = useProfile();
-  const { messages, loading, typingUsers, onlineUsers, sendMessage, setTyping, markAsRead } =
+  const { isUserOnline } = useOnlinePresence();
+  const { messages, loading, typingUsers, sendMessage, setTyping, markAsRead } =
     useConversation(conversationId);
   const [newMessage, setNewMessage] = useState("");
   const [otherUser, setOtherUser] = useState<{
@@ -97,7 +100,7 @@ export function ChatConversation({ conversationId, onBack }: ChatConversationPro
     }
   };
 
-  const isOnline = otherUser && onlineUsers.includes(otherUser.user_id);
+  const isOnline = otherUser ? isUserOnline(otherUser.user_id) : false;
   const initials = otherUser?.display_name?.slice(0, 2).toUpperCase() || "??";
 
   if (loading) {
@@ -121,9 +124,9 @@ export function ChatConversation({ conversationId, onBack }: ChatConversationPro
             <AvatarImage src={otherUser?.avatar_url || undefined} />
             <AvatarFallback className="bg-primary/10 text-primary">{initials}</AvatarFallback>
           </Avatar>
-          {isOnline && (
-            <Circle className="absolute bottom-0 right-0 h-3 w-3 fill-green-500 text-green-500" />
-          )}
+          <div className="absolute -bottom-0.5 -right-0.5">
+            <OnlineIndicator isOnline={isOnline} size="md" />
+          </div>
         </div>
 
         <div className="flex-1">
