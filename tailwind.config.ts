@@ -61,11 +61,18 @@ export default {
         tiwill: {
           pink: "hsl(var(--tiwill-pink))",
           purple: "hsl(var(--tiwill-purple))",
+          violet: "hsl(var(--tiwill-violet))",
           blue: "hsl(var(--tiwill-blue))",
           cyan: "hsl(var(--tiwill-cyan))",
           orange: "hsl(var(--tiwill-orange))",
           yellow: "hsl(var(--tiwill-yellow))",
           green: "hsl(var(--tiwill-green))",
+          red: "hsl(var(--tiwill-red))",
+        },
+        lavender: {
+          50: "hsl(var(--lavender-50))",
+          100: "hsl(var(--lavender-100))",
+          200: "hsl(var(--lavender-200))",
         },
       },
       borderRadius: {
