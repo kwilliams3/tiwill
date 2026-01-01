@@ -145,6 +145,7 @@ const Profile = () => {
             <Button
               variant="ghost"
               size="icon"
+              onClick={() => navigate("/settings")}
               className="backdrop-blur-lg bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all duration-300"
             >
               <Settings className="w-5 h-5" />
