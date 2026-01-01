@@ -270,7 +270,7 @@ const Feed = () => {
         <div className="flex justify-around items-center px-1 py-2">
           {[
             { icon: Home, label: "Accueil", active: true, path: "/feed" },
-            { icon: Search, label: "Découvrir", path: "/discover" },
+            { icon: Search, label: "Découvrir", path: "/discovery" },
             { icon: MessageCircle, label: "Messages", path: "/chat" },
             { icon: User, label: "Profil", path: "/profile" },
           ].map((item) => (
