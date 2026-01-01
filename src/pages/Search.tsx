@@ -237,38 +237,53 @@ const Search = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20 pb-24">
-      {/* Header */}
-      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
-        <div className="flex items-center gap-3 px-4 py-4 safe-top">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="rounded-xl hover:bg-muted flex-shrink-0"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
+      {/* Header with prominent search */}
+      <div className="sticky top-0 z-50 bg-gradient-to-b from-primary/10 via-background to-background backdrop-blur-xl">
+        <div className="px-4 pt-6 pb-4 safe-top">
+          {/* Title row */}
+          <div className="flex items-center justify-between mb-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(-1)}
+              className="rounded-xl hover:bg-background/50 flex-shrink-0"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Trouver des amis
+            </h1>
+            <div className="w-10" /> {/* Spacer for centering */}
+          </div>
           
-          <div className="relative flex-1">
-            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Rechercher des amis..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              autoFocus
-              className="pl-12 pr-10 h-12 rounded-2xl bg-muted/50 border-border/50 focus:border-primary/50 transition-all duration-300"
-            />
-            {searchQuery && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSearchQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full hover:bg-muted"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            )}
+          {/* Prominent search bar */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-2xl blur-xl" />
+            <div className="relative bg-background/90 backdrop-blur-sm rounded-2xl border-2 border-primary/30 shadow-lg shadow-primary/10 overflow-hidden">
+              <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-primary" />
+              <Input
+                type="text"
+                placeholder="Rechercher par nom ou @username..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
+                className="pl-14 pr-12 h-14 text-base bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/70"
+              />
+              {searchQuery ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-xl hover:bg-primary/10 text-primary"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              ) : (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                  <Users className="w-5 h-5 text-muted-foreground/50" />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
