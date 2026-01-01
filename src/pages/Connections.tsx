@@ -3,21 +3,24 @@ import { useAuth } from "@/hooks/useAuth";
 import { useFollowers, useFollowing, useFollow } from "@/hooks/useFollow";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Users, UserMinus, UserPlus } from "lucide-react";
+import { ArrowLeft, Users, UserMinus, UserPlus, Search, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+
+interface UserProfile {
+  id: string;
+  user_id: string;
+  username: string | null;
+  display_name: string | null;
+  avatar_url: string | null;
+  level: number | null;
+}
 
 interface UserCardProps {
-  user: {
-    id: string;
-    user_id: string;
-    username: string | null;
-    display_name: string | null;
-    avatar_url: string | null;
-    level: number | null;
-  };
+  user: UserProfile;
   showUnfollow?: boolean;
   onAction?: () => void;
 }
@@ -100,6 +103,16 @@ const UserCard = ({ user, showUnfollow, onAction }: UserCardProps) => {
   );
 };
 
+const filterUsers = (users: UserProfile[], query: string): UserProfile[] => {
+  if (!query.trim()) return users;
+  const lowerQuery = query.toLowerCase();
+  return users.filter(
+    (user) =>
+      user.display_name?.toLowerCase().includes(lowerQuery) ||
+      user.username?.toLowerCase().includes(lowerQuery)
+  );
+};
+
 const Connections = () => {
   const { userId } = useParams();
   const [searchParams] = useSearchParams();
@@ -109,26 +122,47 @@ const Connections = () => {
   const targetUserId = userId || user?.id;
   const initialTab = searchParams.get("tab") || "followers";
   const [activeTab, setActiveTab] = useState(initialTab);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { followers, loading: loadingFollowers } = useFollowers(targetUserId);
   const { following, loading: loadingFollowing } = useFollowing(targetUserId);
 
   const isOwnProfile = !userId || userId === user?.id;
 
-  const EmptyState = ({ type }: { type: "followers" | "following" }) => (
+  const filteredFollowers = useMemo(
+    () => filterUsers(followers as UserProfile[], searchQuery),
+    [followers, searchQuery]
+  );
+
+  const filteredFollowing = useMemo(
+    () => filterUsers(following as UserProfile[], searchQuery),
+    [following, searchQuery]
+  );
+
+  const EmptyState = ({ type }: { type: "followers" | "following" | "search" }) => (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       className="flex flex-col items-center justify-center py-16 text-center"
     >
       <div className="p-6 rounded-full bg-muted/50 mb-4">
-        <Users className="w-12 h-12 text-muted-foreground" />
+        {type === "search" ? (
+          <Search className="w-12 h-12 text-muted-foreground" />
+        ) : (
+          <Users className="w-12 h-12 text-muted-foreground" />
+        )}
       </div>
       <h3 className="text-lg font-semibold text-foreground mb-2">
-        {type === "followers" ? "Aucun abonné" : "Aucun abonnement"}
+        {type === "search"
+          ? "Aucun résultat"
+          : type === "followers"
+          ? "Aucun abonné"
+          : "Aucun abonnement"}
       </h3>
       <p className="text-muted-foreground max-w-xs">
-        {type === "followers"
+        {type === "search"
+          ? `Aucun utilisateur trouvé pour "${searchQuery}"`
+          : type === "followers"
           ? "Personne ne suit encore ce profil."
           : "Ce profil ne suit personne pour le moment."}
       </p>
@@ -186,6 +220,35 @@ const Connections = () => {
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="px-6 mt-4">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="relative"
+        >
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Rechercher un utilisateur..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-12 pr-10 h-12 rounded-2xl bg-muted/50 border-border/50 focus:border-primary/50 transition-all duration-300"
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full hover:bg-muted"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          )}
+        </motion.div>
+      </div>
+
       {/* Tabs */}
       <div className="px-6 mt-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -195,14 +258,14 @@ const Connections = () => {
               className="rounded-xl h-full text-sm font-semibold data-[state=active]:bg-background data-[state=active]:shadow-lg transition-all duration-300"
             >
               <Users className="w-4 h-4 mr-2" />
-              Abonnés ({followers.length})
+              Abonnés ({filteredFollowers.length})
             </TabsTrigger>
             <TabsTrigger
               value="following"
               className="rounded-xl h-full text-sm font-semibold data-[state=active]:bg-background data-[state=active]:shadow-lg transition-all duration-300"
             >
               <Users className="w-4 h-4 mr-2" />
-              Abonnements ({following.length})
+              Abonnements ({filteredFollowing.length})
             </TabsTrigger>
           </TabsList>
 
@@ -212,13 +275,15 @@ const Connections = () => {
                 <LoadingState />
               ) : followers.length === 0 ? (
                 <EmptyState type="followers" />
+              ) : filteredFollowers.length === 0 ? (
+                <EmptyState type="search" />
               ) : (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="space-y-3"
                 >
-                  {followers.map((follower) => (
+                  {filteredFollowers.map((follower) => (
                     <UserCard key={follower.id} user={follower} />
                   ))}
                 </motion.div>
@@ -232,13 +297,15 @@ const Connections = () => {
                 <LoadingState />
               ) : following.length === 0 ? (
                 <EmptyState type="following" />
+              ) : filteredFollowing.length === 0 ? (
+                <EmptyState type="search" />
               ) : (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="space-y-3"
                 >
-                  {following.map((followed) => (
+                  {filteredFollowing.map((followed) => (
                     <UserCard key={followed.id} user={followed} showUnfollow />
                   ))}
                 </motion.div>
