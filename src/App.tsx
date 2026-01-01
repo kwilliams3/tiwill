@@ -34,6 +34,7 @@ const App = () => (
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/feed" element={<Feed />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/discovery" element={<Discovery />} />
             <Route path="*" element={<NotFound />} />

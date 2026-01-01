@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useFriendSuggestions } from "@/hooks/useFriendSuggestions";
 import { useAuth } from "@/hooks/useAuth";
+import { FollowButton } from "@/components/FollowButton";
 
 export function FriendSuggestions() {
   const navigate = useNavigate();
@@ -63,13 +64,15 @@ export function FriendSuggestions() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.05 }}
-          onClick={() => navigate(`/profile/${friend.user_id}`)}
-          className="relative overflow-hidden rounded-xl cursor-pointer group"
+          className="relative overflow-hidden rounded-xl group"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="relative p-4 bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl">
             <div className="flex items-start gap-3">
-              <Avatar className="h-14 w-14 ring-2 ring-primary/20 shrink-0">
+              <Avatar
+                className="h-14 w-14 ring-2 ring-primary/20 shrink-0 cursor-pointer"
+                onClick={() => navigate(`/profile/${friend.user_id}`)}
+              >
                 <AvatarImage src={friend.avatar_url || ""} />
                 <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-lg">
                   {friend.display_name?.[0] || friend.username?.[0] || "?"}
@@ -77,20 +80,22 @@ export function FriendSuggestions() {
               </Avatar>
 
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold truncate">
-                    {friend.display_name || friend.username || "Anonyme"}
-                  </p>
-                  <Badge variant="secondary" className="shrink-0 text-xs">
-                    Niv. {friend.level}
-                  </Badge>
+                <div className="flex items-center justify-between gap-2">
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/profile/${friend.user_id}`)}
+                  >
+                    <p className="font-semibold truncate">
+                      {friend.display_name || friend.username || "Anonyme"}
+                    </p>
+                    {friend.username && (
+                      <p className="text-sm text-muted-foreground truncate">
+                        @{friend.username}
+                      </p>
+                    )}
+                  </div>
+                  <FollowButton targetUserId={friend.user_id} variant="compact" />
                 </div>
-
-                {friend.username && (
-                  <p className="text-sm text-muted-foreground truncate">
-                    @{friend.username}
-                  </p>
-                )}
 
                 <div className="flex items-center gap-1.5 mt-2">
                   <Heart className="h-3.5 w-3.5 text-pink-500" />
