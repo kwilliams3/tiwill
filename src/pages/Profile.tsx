@@ -279,14 +279,18 @@ const Profile = () => {
           <motion.div variants={itemVariants}>
             <div className="grid grid-cols-4 gap-3">
               {[
-                { label: "Followers", value: followersCount, icon: Users, color: "from-pink-500 to-rose-500" },
-                { label: "Suivis", value: followingCount, icon: Heart, color: "from-tiwill-pink to-tiwill-purple" },
-                { label: "Badges", value: userBadges.length, icon: Trophy, color: "from-amber-500 to-orange-500" },
-                { label: "Points", value: displayProfile?.points || 0, icon: Sparkles, color: "from-emerald-500 to-cyan-500" },
+                { label: "Followers", value: followersCount, icon: Users, color: "from-pink-500 to-rose-500", tab: "followers" },
+                { label: "Suivis", value: followingCount, icon: Heart, color: "from-tiwill-pink to-tiwill-purple", tab: "following" },
+                { label: "Badges", value: userBadges.length, icon: Trophy, color: "from-amber-500 to-orange-500", tab: null },
+                { label: "Points", value: displayProfile?.points || 0, icon: Sparkles, color: "from-emerald-500 to-cyan-500", tab: null },
               ].map((stat, index) => (
                 <div
                   key={index}
-                  className="rounded-2xl bg-gradient-to-br from-white/50 to-white/20 dark:from-gray-900/50 dark:to-gray-800/50 p-3 text-center backdrop-blur-sm border border-border/30 shadow-lg"
+                  onClick={() => stat.tab && navigate(`/connections/${targetUserId}?tab=${stat.tab}`)}
+                  className={cn(
+                    "rounded-2xl bg-gradient-to-br from-white/50 to-white/20 dark:from-gray-900/50 dark:to-gray-800/50 p-3 text-center backdrop-blur-sm border border-border/30 shadow-lg transition-all duration-200",
+                    stat.tab && "cursor-pointer hover:scale-105 hover:shadow-xl"
+                  )}
                 >
                   <div className={`inline-flex p-2 rounded-xl bg-gradient-to-br ${stat.color} mb-2`}>
                     <stat.icon className="w-4 h-4 text-white" />
