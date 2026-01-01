@@ -4,6 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useChat, Conversation } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
+import { useOnlinePresence } from "@/hooks/useOnlinePresence";
+import { OnlineIndicator } from "@/components/OnlineIndicator";
 import { MessageCircle, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -16,6 +18,7 @@ interface ChatListProps {
 export function ChatList({ onSelectConversation, selectedId }: ChatListProps) {
   const { user } = useAuth();
   const { conversations, loading } = useChat();
+  const { isUserOnline } = useOnlinePresence();
   const [search, setSearch] = useState("");
 
   const getOtherParticipant = (conversation: Conversation) => {
@@ -62,6 +65,7 @@ export function ChatList({ onSelectConversation, selectedId }: ChatListProps) {
             const displayName = other?.profile?.display_name || other?.profile?.username || "Utilisateur";
             const avatarUrl = other?.profile?.avatar_url;
             const initials = displayName.slice(0, 2).toUpperCase();
+            const isOnline = other ? isUserOnline(other.user_id) : false;
 
             return (
               <button
@@ -78,11 +82,22 @@ export function ChatList({ onSelectConversation, selectedId }: ChatListProps) {
                       {initials}
                     </AvatarFallback>
                   </Avatar>
+                  {/* Online indicator */}
+                  <div className="absolute -bottom-0.5 -right-0.5">
+                    <OnlineIndicator isOnline={isOnline} size="sm" />
+                  </div>
                 </div>
 
                 <div className="flex-1 min-w-0 text-left">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium truncate">{displayName}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium truncate">{displayName}</span>
+                      {isOnline && (
+                        <span className="text-[10px] text-emerald-500 font-medium">
+                          en ligne
+                        </span>
+                      )}
+                    </div>
                     {conversation.last_message && (
                       <span className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(conversation.last_message.created_at), {
