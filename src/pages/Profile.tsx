@@ -4,6 +4,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useInterests, useUserInterests } from "@/hooks/useInterests";
 import { useGamification } from "@/hooks/useGamification";
 import { useFollowStats } from "@/hooks/useFollow";
+import { useChat } from "@/hooks/useChat";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -11,7 +12,7 @@ import { BadgeDisplay, LevelProgress } from "@/components/GamificationUI";
 import { FollowButton } from "@/components/FollowButton";
 import { 
   ArrowLeft, Camera, Settings, LogOut, Shield, Eye, EyeOff, Star, Trophy,
-  User, Mail, Sparkles, Heart, Zap, Crown, Users
+  User, Mail, Sparkles, Heart, Zap, Crown, Users, MessageCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -34,8 +35,10 @@ const Profile = () => {
   const { user, signOut } = useAuth();
   const { profile, updateProfile, uploadAvatar } = useProfile();
   const { interests } = useInterests();
+  const { createConversation } = useChat();
   const navigate = useNavigate();
   const [isUploading, setIsUploading] = useState(false);
+  const [isStartingChat, setIsStartingChat] = useState(false);
   
   // Determine if viewing own profile or another user's
   const isOwnProfile = !userId || userId === user?.id;
@@ -48,6 +51,21 @@ const Profile = () => {
   // For viewing other profiles
   const [viewProfile, setViewProfile] = useState<ViewProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
+  
+  const handleStartChat = async () => {
+    if (!targetUserId) return;
+    setIsStartingChat(true);
+    try {
+      const conversationId = await createConversation(targetUserId);
+      if (conversationId) {
+        navigate(`/chat?conversation=${conversationId}`);
+      }
+    } catch (error) {
+      console.error("Error starting chat:", error);
+    } finally {
+      setIsStartingChat(false);
+    }
+  };
   
   useEffect(() => {
     if (!isOwnProfile && userId) {
@@ -205,14 +223,26 @@ const Profile = () => {
           </div>
         </motion.div>
 
-        {/* Follow Button for other profiles */}
+        {/* Follow & Message Buttons for other profiles */}
         {!isOwnProfile && targetUserId && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex justify-center mt-4"
+            className="flex justify-center gap-3 mt-4"
           >
             <FollowButton targetUserId={targetUserId} />
+            <Button
+              onClick={handleStartChat}
+              disabled={isStartingChat}
+              className="rounded-full gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white"
+            >
+              {isStartingChat ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <MessageCircle className="w-4 h-4" />
+              )}
+              Message
+            </Button>
           </motion.div>
         )}
 
