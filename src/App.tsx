@@ -16,6 +16,7 @@ import Settings from "./pages/Settings";
 import Search from "./pages/Search";
 import Stories from "./pages/Stories";
 import Challenges from "./pages/Challenges";
+import Collaborations from "./pages/Collaborations";
 import NotFound from "./pages/NotFound";
 import "@fontsource/poppins/400.css";
 import "@fontsource/poppins/500.css";
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/discovery" element={<Discovery />} />
             <Route path="/stories" element={<Stories />} />
             <Route path="/challenges" element={<Challenges />} />
+            <Route path="/collaborations" element={<Collaborations />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
