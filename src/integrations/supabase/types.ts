@@ -47,6 +47,80 @@ export type Database = {
         }
         Relationships: []
       }
+      collaboration_participants: {
+        Row: {
+          collaboration_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          collaboration_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          collaboration_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collaboration_participants_collaboration_id_fkey"
+            columns: ["collaboration_id"]
+            isOneToOne: false
+            referencedRelation: "collaborations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collaborations: {
+        Row: {
+          category: string
+          created_at: string
+          creator_id: string
+          description: string | null
+          expires_at: string | null
+          id: string
+          image_url: string | null
+          max_participants: number | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          max_participants?: number | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          max_participants?: number | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comment_reactions: {
         Row: {
           comment_id: string
