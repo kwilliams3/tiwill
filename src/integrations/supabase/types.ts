@@ -47,6 +47,38 @@ export type Database = {
         }
         Relationships: []
       }
+      collaboration_messages: {
+        Row: {
+          collaboration_id: string
+          content: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          collaboration_id: string
+          content: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          collaboration_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collaboration_messages_collaboration_id_fkey"
+            columns: ["collaboration_id"]
+            isOneToOne: false
+            referencedRelation: "collaborations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collaboration_participants: {
         Row: {
           collaboration_id: string
