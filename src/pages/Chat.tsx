@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { ChatList } from "@/components/ChatList";
 import { ChatConversation } from "@/components/ChatConversation";
-import { MessageCircle, Home, Search, User, ArrowLeft, MoreVertical } from "lucide-react";
+import { BottomNav } from "@/components/BottomNav";
+import { MessageCircle, ArrowLeft, MoreVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -148,31 +149,7 @@ export default function Chat() {
       </div>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t z-40 safe-bottom">
-        <div className="flex justify-around items-center px-1 py-2">
-          {[
-            { icon: Home, label: "Accueil", path: "/feed" },
-            { icon: Search, label: "Découvrir", path: "/discover" },
-            { icon: MessageCircle, label: "Messages", active: true, path: "/chat" },
-            { icon: User, label: "Profil", path: "/profile" },
-          ].map((item) => (
-            <button
-              key={item.label}
-              onClick={() => item.path && navigate(item.path)}
-              className={cn(
-                "flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all touch-target min-w-[64px]",
-                item.active
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              aria-label={item.label}
-            >
-              <item.icon className="w-6 h-6" />
-              <span className="text-[10px] font-medium">{item.label}</span>
-            </button>
-          ))}
-        </div>
-      </nav>
+      <BottomNav />
 
       {/* FAB for new conversation (mobile) */}
       {!selectedConversation && (
