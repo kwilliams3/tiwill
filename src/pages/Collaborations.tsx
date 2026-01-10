@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCollaborations, CreateCollaborationData } from "@/hooks/useCollaborations";
 import { DesktopHeader } from "@/components/DesktopHeader";
 import { BottomNav } from "@/components/BottomNav";
+import { CollaborationChat } from "@/components/CollaborationChat";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +27,8 @@ import {
   Clock,
   UserPlus,
   LogOut,
-  Loader2
+  Loader2,
+  MessageCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -59,6 +61,11 @@ export default function Collaborations() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [chatOpen, setChatOpen] = useState<{
+    id: string;
+    title: string;
+    participantsCount: number;
+  } | null>(null);
   const [newCollab, setNewCollab] = useState<CreateCollaborationData>({
     title: "",
     description: "",
@@ -344,43 +351,72 @@ export default function Collaborations() {
                     </span>
                   </div>
 
-                  {/* Action Button */}
-                  {project.is_participant ? (
-                    <Button 
-                      className="w-full gap-2" 
-                      variant="outline"
-                      onClick={() => handleJoinOrLeave(project)}
-                      disabled={isCreator}
-                    >
-                      {isCreator ? (
-                        "Votre projet"
-                      ) : (
-                        <>
-                          <LogOut className="w-4 h-4" />
-                          Quitter le projet
-                        </>
-                      )}
-                    </Button>
-                  ) : project.status === "open" && spotsLeft > 0 ? (
-                    <Button 
-                      className="w-full gap-2" 
-                      variant="outline"
-                      onClick={() => handleJoinOrLeave(project)}
-                    >
-                      <UserPlus className="w-4 h-4" />
-                      Rejoindre ({spotsLeft} place{spotsLeft > 1 ? "s" : ""})
-                    </Button>
-                  ) : (
-                    <Button className="w-full" variant="ghost" disabled>
-                      Complet
-                    </Button>
-                  )}
+                  {/* Action Buttons */}
+                  <div className="flex gap-2">
+                    {project.is_participant && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setChatOpen({
+                          id: project.id,
+                          title: project.title,
+                          participantsCount: project.participants_count
+                        })}
+                        className="shrink-0"
+                        title="Ouvrir le chat"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                      </Button>
+                    )}
+                    
+                    {project.is_participant ? (
+                      <Button 
+                        className="flex-1 gap-2" 
+                        variant="outline"
+                        onClick={() => handleJoinOrLeave(project)}
+                        disabled={isCreator}
+                      >
+                        {isCreator ? (
+                          "Votre projet"
+                        ) : (
+                          <>
+                            <LogOut className="w-4 h-4" />
+                            Quitter
+                          </>
+                        )}
+                      </Button>
+                    ) : project.status === "open" && spotsLeft > 0 ? (
+                      <Button 
+                        className="flex-1 gap-2" 
+                        variant="outline"
+                        onClick={() => handleJoinOrLeave(project)}
+                      >
+                        <UserPlus className="w-4 h-4" />
+                        Rejoindre ({spotsLeft} place{spotsLeft > 1 ? "s" : ""})
+                      </Button>
+                    ) : (
+                      <Button className="flex-1" variant="ghost" disabled>
+                        Complet
+                      </Button>
+                    )}
+                  </div>
                 </div>
               );
             })}
           </div>
         )}
       </main>
+
+      {/* Chat Panel */}
+      {chatOpen && (
+        <CollaborationChat
+          collaborationId={chatOpen.id}
+          collaborationTitle={chatOpen.title}
+          participantsCount={chatOpen.participantsCount}
+          isOpen={!!chatOpen}
+          onClose={() => setChatOpen(null)}
+        />
+      )}
 
       <BottomNav />
     </div>
