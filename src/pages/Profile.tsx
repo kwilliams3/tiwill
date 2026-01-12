@@ -58,7 +58,7 @@ const Profile = () => {
     try {
       const conversationId = await createConversation(targetUserId);
       if (conversationId) {
-        navigate(`/chat?conversation=${conversationId}`);
+        navigate(`/chat?id=${conversationId}`);
       }
     } catch (error) {
       console.error("Error starting chat:", error);
