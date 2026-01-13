@@ -284,6 +284,7 @@ export function useConversation(conversationId: string | null) {
 
     if (error) {
       console.error("Error sending message:", error);
+      throw error;
     }
   };
 
