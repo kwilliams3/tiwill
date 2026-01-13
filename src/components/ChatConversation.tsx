@@ -4,7 +4,7 @@ import { fr } from "date-fns/locale";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useConversation, Message } from "@/hooks/useChat";
+import { useConversation } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useOnlinePresence } from "@/hooks/useOnlinePresence";
@@ -12,6 +12,7 @@ import { OnlineIndicator } from "@/components/OnlineIndicator";
 import { ArrowLeft, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChatConversationProps {
   conversationId: string;
@@ -21,10 +22,12 @@ interface ChatConversationProps {
 export function ChatConversation({ conversationId, onBack }: ChatConversationProps) {
   const { user } = useAuth();
   const { profile } = useProfile();
+  const { toast } = useToast();
   const { isUserOnline } = useOnlinePresence();
   const { messages, loading, typingUsers, sendMessage, setTyping, markAsRead } =
     useConversation(conversationId);
   const [newMessage, setNewMessage] = useState("");
+  const [sending, setSending] = useState(false);
   const [otherUser, setOtherUser] = useState<{
     user_id: string;
     display_name: string;
@@ -67,33 +70,39 @@ export function ChatConversation({ conversationId, onBack }: ChatConversationPro
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
 
-    // Set typing indicator
-    setTyping(true, profile?.display_name || "Quelqu'un");
+    // Set typing indicator (best-effort)
+    setTyping(true, profile?.display_name || "Quelqu'un").catch(() => {});
 
-    // Clear previous timeout
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
-    // Set new timeout to clear typing
     typingTimeoutRef.current = setTimeout(() => {
-      setTyping(false, profile?.display_name || "");
+      setTyping(false, profile?.display_name || "").catch(() => {});
     }, 2000);
   };
 
   const handleSend = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || sending) return;
 
-    await sendMessage(newMessage);
-    setNewMessage("");
-    setTyping(false, "");
+    setSending(true);
+    try {
+      await sendMessage(newMessage);
+      setNewMessage("");
+      setTyping(false, "").catch(() => {});
 
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    } catch (err: any) {
+      console.error("Send message failed:", err);
+      toast({
+        title: "Erreur",
+        description: err?.message || "Impossible d'envoyer le message",
+        variant: "destructive",
+      });
+    } finally {
+      setSending(false);
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -219,10 +228,10 @@ export function ChatConversation({ conversationId, onBack }: ChatConversationPro
             placeholder="Écrire un message..."
             value={newMessage}
             onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             className="flex-1"
           />
-          <Button onClick={handleSend} disabled={!newMessage.trim()}>
+          <Button onClick={handleSend} disabled={!newMessage.trim() || sending}>
             <Send className="h-4 w-4" />
           </Button>
         </div>
