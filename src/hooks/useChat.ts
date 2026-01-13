@@ -155,15 +155,19 @@ export function useChat() {
 
       if (convError) throw convError;
 
-      // Add both participants
-      const { error: partError } = await supabase
+      // Add current user as participant first (required by RLS)
+      const { error: selfPartError } = await supabase
         .from("conversation_participants")
-        .insert([
-          { conversation_id: conv.id, user_id: user.id },
-          { conversation_id: conv.id, user_id: otherUserId },
-        ]);
+        .insert({ conversation_id: conv.id, user_id: user.id });
 
-      if (partError) throw partError;
+      if (selfPartError) throw selfPartError;
+
+      // Now add the other participant (allowed because we're already a participant)
+      const { error: otherPartError } = await supabase
+        .from("conversation_participants")
+        .insert({ conversation_id: conv.id, user_id: otherUserId });
+
+      if (otherPartError) throw otherPartError;
 
       await fetchConversations();
       return conv.id;

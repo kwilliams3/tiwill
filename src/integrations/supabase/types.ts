@@ -713,6 +713,10 @@ export type Database = {
         Args: { _action: string; _points: number; _user_id: string }
         Returns: number
       }
+      can_add_participant: {
+        Args: { _conversation_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
