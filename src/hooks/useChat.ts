@@ -135,42 +135,27 @@ export function useChat() {
         for (const part of myParticipations) {
           const { data: otherPart } = await supabase
             .from("conversation_participants")
-            .select("*")
+            .select("id")
             .eq("conversation_id", part.conversation_id)
             .eq("user_id", otherUserId)
             .maybeSingle();
 
-          if (otherPart) {
-            return part.conversation_id;
-          }
+          if (otherPart) return part.conversation_id;
         }
       }
 
-      // Create new conversation
-      const { data: conv, error: convError } = await supabase
-        .from("conversations")
-        .insert({})
-        .select()
-        .single();
+      // Create new conversation + participants in one backend call.
+      // This avoids an extra SELECT on `conversations` right after INSERT that can fail RLS.
+      const { data, error } = (await (supabase as any).rpc(
+        "create_conversation_with_participants",
+        { _other_user_id: otherUserId }
+      )) as { data: string | null; error: any };
 
-      if (convError) throw convError;
-
-      // Add current user as participant first (required by RLS)
-      const { error: selfPartError } = await supabase
-        .from("conversation_participants")
-        .insert({ conversation_id: conv.id, user_id: user.id });
-
-      if (selfPartError) throw selfPartError;
-
-      // Now add the other participant (allowed because we're already a participant)
-      const { error: otherPartError } = await supabase
-        .from("conversation_participants")
-        .insert({ conversation_id: conv.id, user_id: otherUserId });
-
-      if (otherPartError) throw otherPartError;
+      if (error) throw error;
+      if (!data) throw new Error("Conversation non créée");
 
       await fetchConversations();
-      return conv.id;
+      return data;
     } catch (error) {
       console.error("Error creating conversation:", error);
       return null;

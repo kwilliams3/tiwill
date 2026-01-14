@@ -12,6 +12,7 @@ import { MessageCircle, Search, UserPlus, X, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChatListProps {
   onSelectConversation: (conversationId: string) => void;
@@ -28,6 +29,7 @@ interface UserSearchResult {
 
 export function ChatList({ onSelectConversation, selectedId }: ChatListProps) {
   const { user } = useAuth();
+  const { toast } = useToast();
   const { conversations, loading, createConversation } = useChat();
   const { isUserOnline } = useOnlinePresence();
   const [search, setSearch] = useState("");
@@ -78,9 +80,20 @@ export function ChatList({ onSelectConversation, selectedId }: ChatListProps) {
         onSelectConversation(conversationId);
         setSearch("");
         setSearchResults([]);
+      } else {
+        toast({
+          title: "Impossible de démarrer la conversation",
+          description: "La création de la conversation a échoué. Réessaie en te déconnectant/reconnectant.",
+          variant: "destructive",
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating conversation:", error);
+      toast({
+        title: "Erreur",
+        description: error?.message || "Impossible de créer la conversation",
+        variant: "destructive",
+      });
     } finally {
       setCreatingConversation(null);
     }
