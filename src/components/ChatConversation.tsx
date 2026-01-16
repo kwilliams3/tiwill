@@ -121,7 +121,7 @@ export function ChatConversation({ conversationId, onBack }: ChatConversationPro
   }
 
   return (
-    <div className="flex flex-col h-full pb-20 md:pb-0">
+    <div className="flex flex-col h-full">\
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-border bg-background/95 backdrop-blur">
         <Button variant="ghost" size="icon" onClick={onBack} className="md:hidden">
@@ -221,18 +221,22 @@ export function ChatConversation({ conversationId, onBack }: ChatConversationPro
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="p-4 border-t border-border bg-background">
+      {/* Input - Fixed at bottom */}
+      <div className="p-4 border-t border-border bg-background sticky bottom-0 md:relative md:bottom-auto safe-bottom">
         <div className="flex gap-2">
           <Input
             placeholder="Écrire un message..."
             value={newMessage}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            className="flex-1"
+            className="flex-1 h-12 text-base"
           />
-          <Button onClick={handleSend} disabled={!newMessage.trim() || sending}>
-            <Send className="h-4 w-4" />
+          <Button 
+            onClick={handleSend} 
+            disabled={!newMessage.trim() || sending}
+            className="h-12 w-12"
+          >
+            <Send className="h-5 w-5" />
           </Button>
         </div>
       </div>

@@ -52,7 +52,7 @@ export default function Chat() {
   const showConversation = selectedConversation;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col safe-area-padding pb-20 md:pb-0">
+    <div className="h-screen bg-background flex flex-col safe-area-padding overflow-hidden">
       {/* Header - Changes based on state */}
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b px-4 py-3 safe-top">
         <div className="flex items-center justify-between h-12">
@@ -98,7 +98,7 @@ export default function Chat() {
       </header>
 
       {/* Main content */}
-      <div className="flex-1 flex overflow-hidden relative">
+      <div className="flex-1 flex overflow-hidden relative pb-16 md:pb-0">
         {/* Chat list */}
         <div
           className={cn(
