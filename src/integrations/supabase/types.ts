@@ -235,6 +235,42 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_games: {
+        Row: {
+          created_at: string
+          data: Json
+          description: string | null
+          expires_at: string
+          game_type: string
+          id: string
+          points_reward: number
+          starts_at: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          data: Json
+          description?: string | null
+          expires_at: string
+          game_type: string
+          id?: string
+          points_reward?: number
+          starts_at?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          description?: string | null
+          expires_at?: string
+          game_type?: string
+          id?: string
+          points_reward?: number
+          starts_at?: string
+          title?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
@@ -255,6 +291,50 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      game_attempts: {
+        Row: {
+          attempts_count: number
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          game_id: string
+          id: string
+          score: number
+          time_taken_seconds: number | null
+          user_id: string
+        }
+        Insert: {
+          attempts_count?: number
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          game_id: string
+          id?: string
+          score?: number
+          time_taken_seconds?: number | null
+          user_id: string
+        }
+        Update: {
+          attempts_count?: number
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          game_id?: string
+          id?: string
+          score?: number
+          time_taken_seconds?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_attempts_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "daily_games"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       interests: {
         Row: {
