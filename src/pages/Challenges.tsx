@@ -5,6 +5,7 @@ import { DesktopHeader } from "@/components/DesktopHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { DailyGamesSection } from "@/components/games/DailyGamesSection";
 import { 
   Trophy, 
   Camera, 
@@ -15,7 +16,8 @@ import {
   ArrowLeft,
   Clock,
   Users,
-  Zap
+  Zap,
+  Gamepad2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -168,6 +170,15 @@ export default function Challenges() {
             </div>
           </div>
         </div>
+
+        {/* Daily Games Section - Jeux de réflexion */}
+        <section className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Gamepad2 className="w-5 h-5 text-tiwill-purple" />
+            <h2 className="text-lg font-semibold">Jeux de Réflexion</h2>
+          </div>
+          <DailyGamesSection />
+        </section>
 
         {/* Daily Challenges */}
         <section className="mb-8">
