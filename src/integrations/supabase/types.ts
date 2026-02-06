@@ -801,6 +801,19 @@ export type Database = {
         Args: { _other_user_id: string }
         Returns: string
       }
+      get_game_leaderboard: {
+        Args: { limit_count?: number }
+        Returns: {
+          avatar_url: string
+          avg_time_seconds: number
+          best_time_seconds: number
+          display_name: string
+          games_completed: number
+          total_score: number
+          user_id: string
+          username: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

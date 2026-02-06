@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { DailyGamesSection } from "@/components/games/DailyGamesSection";
+import { Leaderboard } from "@/components/games/Leaderboard";
 import { 
   Trophy, 
   Camera, 
@@ -17,7 +18,8 @@ import {
   Clock,
   Users,
   Zap,
-  Gamepad2
+  Gamepad2,
+  Crown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -170,6 +172,15 @@ export default function Challenges() {
             </div>
           </div>
         </div>
+
+        {/* Leaderboard */}
+        <section className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Crown className="w-5 h-5 text-yellow-500" />
+            <h2 className="text-lg font-semibold">Classement des Joueurs</h2>
+          </div>
+          <Leaderboard />
+        </section>
 
         {/* Daily Games Section - Jeux de réflexion */}
         <section className="mb-8">
